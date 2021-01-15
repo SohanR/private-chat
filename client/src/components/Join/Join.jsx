@@ -1,29 +1,40 @@
+import { Button, Container, TextField, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import './Join.css';
+import { Link } from "react-router-dom";
+import useStyles from './style';
+
+
+
 
 const Join = () => {
     const [name, setName] = useState("");
     const [room, setRoom] = useState("");
 
+    const classes = useStyles();
+
 
     return(
-        <div className="joinOuterContainer">
-            <div className="joinInnerContainer">
-                <h1 className="heading">Welcome to Private Chat</h1>
+        <Container  component="main"  >
 
-                <div>
-                    <input type="text" placeholder="Name" className="joinInput" onChange={(event) => setName(event.target.value)} />
-                </div>
+            <div  maxWidth="xs"  justifyContent="center" className={classes.paper}>
+                <Typography color='initial' className={classes.mTop} component='h1' variant='h5' >Welcome to Private Chat Room</Typography>
+                <form>
+                    <TextField variant='outlined' margin='normal' required fullWidth label="Name" name='name' autoFocus type="text" onChange={(event) => setName(event.target.value)} >
+                        Name
+                    </TextField>
 
-                <div>
-                    <input type="text" placeholder="Room" className="joinInput mt-20" onChange={(event) => setRoom(event.target.value)} />
-                </div>
-                <Link onClick={e => (!name || !room) ? e.preventDefault() : null} to={`/chat?name=${name}&room=${room}`} >
-                    <button className="button mt-20" >Sing In</button>
-                </Link>
+                    <TextField variant='outlined' margin='normal' required fullWidth label='Room' name='room' type="text" onChange={(event) =>setRoom(event.target.value)} >
+                        Room
+                    </TextField>
+                </form>
+            
+                <Link to={`/chat?name=${name}&room=${room}`} onClick={e => (!name || !room) ? e.preventDefault() : null } >
+                    <Button className={classes.submit} type='submit' fullWidth variant='contained' color='primary' >
+                    Lets Chat
+                    </Button>
+                </Link>                
             </div>
-        </div>
+        </Container>
     )
 }
 
