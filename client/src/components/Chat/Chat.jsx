@@ -8,12 +8,17 @@ const Chat = ({location}) => {
 
     const [name, setName] = useState("");
     const [room, setRoom] = useState("");
-    const EP = 'localhost:5000';
+    const EP = 'http://localhost:5000/';
 
     useEffect(() =>{
         const {name , room} = queryString.parse(location.search);
 
-        socket = io(EP);
+        socket = io(EP,{
+            withCredentials:true,
+            extraHeaders:{
+                "my-custom-header": "abcd"
+            }
+        });
 
         setName(name);
         setRoom(room);
@@ -22,7 +27,7 @@ const Chat = ({location}) => {
     },[EP, location.search])
 
     return(
-        <h1>helloooooooooooooo</h1>
+        <h1>helloooooooooooooo {name} welcome to {room}</h1>
     )
 }
 
