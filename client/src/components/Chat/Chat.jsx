@@ -1,36 +1,33 @@
 import queryString from 'query-string';
 import React, { useEffect, useState } from 'react';
 import io from 'socket.io-client';
+import InfoBar from '../InfoBar/InfoBar';
+import './Chat.css';
 
 
+let socket;
 
 const Chat = ({ location }) => {
 
     const [name, setName] = useState("");
     const [room, setRoom] = useState("");
+    const [message, setMessage] = useState("");
+    const [messages, setMessages] = useState([]);
+
     const EP = 'http://localhost:5000/';
    
     useEffect(() =>{
         const {name , room} = queryString.parse(location.search);
 
-        const socket = io.connect(EP , {
-            "force new connection" : true,
-            "reconnectionAttempts": "Infinity", 
-            "timeout" : 10000,                  
-            "transports" : ["websocket"],
-            withCredentials:true,
-                extraHeaders:{
-                    "my-custom-header": "abcd"
-                }
-        });
+        socket = io(EP)
 
         setName(name);
         setRoom(room);
 
         console.log(socket);
 
-        socket.emit('join', {name,room},({error})=>{
-            alert(error)
+        socket.emit('join', {name, room}, (error)=>{
+        //     alert(error)
         })
 
         return ()=>{
@@ -41,8 +38,34 @@ const Chat = ({ location }) => {
 
     },[EP, location.search])
 
+
+    useEffect(()=>{
+
+        socket.on('message', (message)=>{
+            setMessages([...messages,message])
+        })
+    },[messages]);
+
+    
+
+    //sending massages logic
+
+    const sendMessage = (event)=>{
+        event.preventDefault();
+
+        if(message){
+            socket.emit('sendMessage' , message, ()=> setMessage(""));
+        }
+
+        console.log(message, messages);
+    }
+
     return(
-        <h1>helloooooooooooooo {name} welcome to {room}</h1>
+       <div className="outerContainer">
+           <div className="container" >
+              <InfoBar room={room} /> 
+           </div>           
+       </div>
     )
 }
 
