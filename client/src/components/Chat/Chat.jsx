@@ -1,74 +1,66 @@
 import queryString from 'query-string';
-import React, { useEffect, useState } from 'react';
-import io from 'socket.io-client';
+import React, { useEffect, useState } from "react";
+import io from "socket.io-client";
 import InfoBar from '../InfoBar/InfoBar';
 import Input from '../Input/Input';
+import Messages from '../Messages/Messages';
 import './Chat.css';
 
+
+
+
+const ENDPOINT = 'http://localhost:5000/';
 
 let socket;
 
 const Chat = ({ location }) => {
+  const [name, setName] = useState('');
+  const [room, setRoom] = useState('');
+  //const [users, setUsers] = useState('');
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
 
-    const [name, setName] = useState("");
-    const [room, setRoom] = useState("");
-    const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState([]);
+  useEffect(() => {
+    const { name, room } = queryString.parse(location.search);
 
-    const EP = 'http://localhost:5000/';
-   
-    useEffect(() =>{
-        const {name , room} = queryString.parse(location.search);
+    socket = io(ENDPOINT);
 
-        socket = io(EP)
+    setRoom(room);
+    setName(name)
 
-        setName(name);
-        setRoom(room);
-
-        console.log(socket);
-
-        socket.emit('join', {name, room}, (error)=>{
-        //     alert(error)
-        })
-
-        return ()=>{
-            socket.emit('disconnect');
-
-            socket.off();
-        }
-
-    },[EP, location.search])
-
-
-    useEffect(()=>{
-
-        socket.on('message', (message)=>{
-            setMessages([...messages,message])
-        })
-    },[messages]);
-
+    socket.emit('join', { name, room }, (error) => {
+      if(error) {
+        alert(error);
+      }
+    });
+  }, [ENDPOINT, location.search]);
+  
+  useEffect(() => {
+    socket.on('message', message => {
+      setMessages(messages => [ ...messages, message ]);
+    });
     
+    
+}, []);
 
-    //sending massages logic
+  const sendMessage = (event) => {
+    event.preventDefault();
 
-    const sendMessage = (event)=>{
-        event.preventDefault();
-
-        if(message){
-            socket.emit('sendMessage' , message, ()=> setMessage(""));
-        }
-
-        console.log(message, messages);
+    if(message) {
+      socket.emit('sendMessage', message, () => setMessage(''));
     }
+  }
 
-    return(
-       <div className="outerContainer">
-           <div className="container" >
-              <InfoBar room={room} /> 
-              <Input message={message} setMessage={sendMessage} sendMessage={sendMessage} />
-           </div>           
-       </div>
-    )
+  return (
+    <div className="outerContainer">
+      <div className="container">
+          <InfoBar room={room} />
+          <Messages messages={messages} name={name} />
+          <Input message={message} setMessage={setMessage} sendMessage={sendMessage} />
+      </div>
+     
+    </div>
+  );
 }
 
 export default Chat;
